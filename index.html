@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Search Catalogue</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            color: #1a365d;
+            margin-bottom: 4px;
+        }
+        .header p {
+            font-size: 0.875rem;
+            color: #718096;
+        }
+        .search-container {
+            position: sticky;
+            top: 0;
+            background-color: #f4f6f9;
+            padding-bottom: 12px;
+            z-index: 10;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: border-color 0.2s;
+        }
+        .search-bar:focus {
+            border-color: #3182ce;
+        }
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .tab {
+            padding: 8px 14px;
+            background-color: #edf2f7;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4a5568;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .tab.active {
+            background-color: #3182ce;
+            color: white;
+        }
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .item-card {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        .item-info {
+            flex: 1;
+        }
+        .item-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .item-cat {
+            font-size: 0.75rem;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        .item-location {
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            text-align: right;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #a0aec0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🔬 Lab Item Catalogue</h1>
+        <p>Quick Location Search</p>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Search item name or location..." oninput="filterItems()">
+        <div class="category-tabs">
+            <button class="tab active" onclick="setCategory('All', this)">All</button>
+            <button class="tab" onclick="setCategory('Glassware', this)">Glassware</button>
+            <button class="tab" onclick="setCategory('Consumables', this)">Consumables</button>
+            <button class="tab" onclick="setCategory('Chemicals', this)">Chemicals</button>
+            <button class="tab" onclick="setCategory('Equipment', this)">Equipment</button>
+        </div>
+    </div>
+
+    <div class="item-list" id="itemList"></div>
+    <div class="empty-state" id="emptyState">No items found matching your search.</div>
+
+    <script>
+        const rawData = [
+            {"name": "Beaker 100 mL", "location": "WCUS-9<br>(Wall Cupboard-02)", "category": "Glassware"},
+            {"name": "Beaker 1000 mL", "location": "WCUS-4<br>(Wall Cupboard-01)", "category": "Glassware"},
+            {"name": "Beaker 500 mL", "location": "WCUS-1<br>(Wall Cupboard-01)", "category": "Glassware"},
+            {"name": "Beaker 250ML", "location": "WCUS-1<br>(Wall Cupboard-01)", "category": "Glassware"},
+            {"name": "Burette with PTFE Key Stopcock / Capacity 50 mL", "location": "PLS5&6<br>(Pantry Cupboard-06)", "category": "Glassware"},
+            {"name": "Flask Conical 250 mL", "location": "WCUS-2<br>(Wall Cupboard-01)", "category": "Glassware"},
+            {"name": "Flask Conical 100 mL", "location": "WCUS-5<br>(Wall Cupboard-01)", "category": "Glassware"},
+            {"name": "Flask Conical 500 mL", "location": "WCUS-14<br>(Wall Cupboard-03)", "category": "Glassware"},
+            {"name": "Measuring Cylinder 10 mL", "location": "WCUS-9<br>(Wall Cupboard-02)", "category": "Glassware"},
+            {"name": "Measuring Cylinder 25 mL", "location": "WCLS-3<br>(Wall Cupboard-04)", "category": "Glassware"},
+            {"name": "Measuring Cylinder 50 mL", "location": "WCUS-9<br>(Wall Cupboard-02)", "category": "Glassware"},
+            {"name": "Measuring Cylinder 100 mL", "location": "WCLS-2<br>(Wall Cupboard-04)", "category": "Glassware"},
+            {"name": "Measuring Cylinder 1000 mL", "location": "PLS-3<br>(Pantry Cupboard-05)", "category": "Glassware"},
+            {"name": "Volumetric Flask 100 mL", "location": "WCUS-8<br>(Wall Cupboard-02)", "category": "Glassware"},
+            {"name": "Volumetric Flask 250 mL", "location": "WCUS-2<br>(Wall Cupboard-01)", "category": "Glassware"},
+            {"name": "Volumetric Flask 500 mL", "location": "WCLS-8<br>(Wall Cupboard-02)", "category": "Glassware"},
+            {"name": "Volumetric Flask 1000 mL", "location": "WCLS-8<br>(Wall Cupboard-02)", "category": "Glassware"},
+            {"name": "Pipette Graduated 10 mL", "location": "WCLS-3<br>(Wall Cupboard-04)", "category": "Glassware"},
+            {"name": "Pipette Graduated 1000 mL", "location": "Not Mention<br>(-)", "category": "Glassware"},
+            {"name": "Pipette Graduated 25 mL", "location": "WCLS-3<br>(Wall Cupboard-04)", "category": "Glassware"},
+            {"name": "Petri Dish 90 x 15 mm", "location": "WCUS-9&7<br>(Wall Cupboard-02)", "category": "Glassware"},
+            {"name": "Bottle reagent 1000 ml", "location": "WCUS-13<br>(Wall Cupboard-03)", "category": "Glassware"},
+            {"name": "Bottle reagentx 100 ml", "location": "WCUS-13<br>(Wall Cupboard-03)", "category": "Glassware"},
+            {"name": "Bottle reagent 250 ml", "location": "WCUS-13<br>(Wall Cupboard-03)", "category": "Glassware"},
+            {"name": "Bottle reagent 500 ml", "location": "WCUS-13<br>(Wall Cupboard-03)", "category": "Glassware"},
+            {"name": "Funnels / Diameter 50 mm", "location": "WCUS-2<br>(Wall Cupboard-01)", "category": "Glassware"},
+            {"name": "Reagent Bottle 250 mL 19/26", "location": "WCLS-14<br>(Wall Cupboard-03)", "category": "Glassware"},
+            {"name": "Flask round bottom 250ml", "location": "WCLS-4<br>(Wall Cupboard-04)", "category": "Glassware"},
+            {"name": "Flask round bottom 500ml", "location": "WCLS-2<br>(Wall Cupboard-02)", "category": "Glassware"},
+            {"name": "Test Tubes 15 x 125 mm", "location": "WCUS-11&12<br>(Wall Cupboard-03)", "category": "Glassware"},
+            {"name": "Watch Glass-Size 75mm - 1", "location": "WCUS-9&12<br>(Wall Cupboard-02/03)", "category": "Glassware"},
+            {"name": "Forceps / Size 150 mm", "location": "PLS-9<br>(Pantry Cupboard-07)", "category": "Consumables"},
+            {"name": "Microscope Slide", "location": "PUS-10<br>(Pantry Cupboard-03)", "category": "Consumables"},
+            {"name": "Powder Free Gloves (S/M/L)", "location": "PLS-9<br>(Pantry Cupboard-07)", "category": "Consumables"},
+            {"name": "Wash Bottle 500 mL", "location": "PLS-7<br>(Pantry Cupboard-06)", "category": "Consumables"},
+            {"name": "80-Well Microtube Racks", "location": "PLS-10<br>(Pantry Cupboard-07)", "category": "Consumables"},
+            {"name": "Spatula Stainless Steel / Size 150 mm", "location": "PLS-9<br>(Pantry Cupboard-07)", "category": "Consumables"},
+            {"name": "Spatula Stainless Steel / Size 250 mm", "location": "PLS-9<br>(Pantry Cupboard-07)", "category": "Consumables"},
+            {"name": "Filter Paper 110 mm", "location": "PLS-7<br>(Pantry Cupboard-06)", "category": "Consumables"},
+            {"name": "Parafilm 4 x 125 ft", "location": "PLS-9<br>(Pantry Cupboard-07)", "category": "Consumables"},
+            {"name": "Test tube stand 25mm x 24", "location": "PLS-10<br>(Pantry Cupboard-07)", "category": "Consumables"},
+            {"name": "Safety Pipette Filler", "location": "PLS-7<br>(Pantry Cupboard-06)", "category": "Consumables"},
+            {"name": "Stirrer bar 25mm x 8mm", "location": "PLS-7<br>(Pantry Cupboard-06)", "category": "Consumables"},
+            {"name": "Centrifuge Tube 15ml", "location": "PUS-12<br>(Pantry Cupboard-03)", "category": "Consumables"},
+            {"name": "Centrifuge Tube 50 ml", "location": "PUS-12<br>(Pantry Cupboard-03)", "category": "Consumables"},
+            {"name": "Transfer Pipets 3 ml", "location": "PUS-10<br>(Pantry Cupboard-03)", "category": "Consumables"},
+            {"name": "Microcentrifuge Tubes 1.5 ml", "location": "PLS-10<br>(Pantry Cupboard-07)", "category": "Consumables"},
+            {"name": "Microcentrifuge Tubes 2.0 ml", "location": "PLS-10<br>(Pantry Cupboard-07)", "category": "Consumables"},
+            {"name": "pH Indicator strips (nobleeding) pH 0 -14", "location": "PUS-10<br>(Pantry Cupboard-03)", "category": "Consumables"},
+            {"name": "XS buffer solution pH 7.00 +/- 0.01 / 25C green color", "location": "PUS-8<br>(Pantry Cupboard-02)", "category": "Chemicals"},
+            {"name": "XS buffer solution pH 10.01 +/- 0.02 / 25C colourless", "location": "PUS-8<br>(Pantry Cupboard-02)", "category": "Chemicals"},
+            {"name": "XS buffer solution pH 4.00 +/- 0.01 (RED)", "location": "PUS-8<br>(Pantry Cupboard-02)", "category": "Chemicals"},
+            {"name": "Calcium Carbonate", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
+            {"name": "Iodine Resublimed", "location": "PLS-11<br>(Pantry Cupboard-07)", "category": "Chemicals"},
+            {"name": "Isopropanol (IPA)", "location": "PLS-8<br>(Pantry Cupboard-06)", "category": "Chemicals"},
+            {"name": "Magnesium Sulfate Heptahydrate", "location": "WCUS-15<br>(Wall Cupboard-06)", "category": "Chemicals"},
+            {"name": "Nitric Acid (69%)", "location": "PLS-2<br>(Pantry Cupboard-05)", "category": "Chemicals"},
+            {"name": "Potassium Iodide", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
+            {"name": "Sodium Carbonate Anhydrous", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
+            {"name": "Sodium Sulphate Anhydrous", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
+            {"name": "Sodium Hydroxide Pellets", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
+            {"name": "Ammonium Thiocyanate", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
+            {"name": "Barium Chloride Dihydrate", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
+            {"name": "Sulphuric Acid 98%", "location": "PLS-1<br>(Pantry Cupboard-05)", "category": "Chemicals"},
+            {"name": "Phenolphthalein", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals"},
+            {"name": "Potassium Chloride", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals"},
+            {"name": "Silver Nitrate", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals"},
+            {"name": "Sodium Chloride", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals"},
+            {"name": "Starch Soluble extra pure", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals"},
+            {"name": "Balance", "location": "Counter Top", "category": "Equipment"},
+            {"name": "PH Meter", "location": "Counter Top", "category": "Equipment"},
+            {"name": "Microscope 01", "location": "WCUS-3<br>(Wall Cupboard-01)", "category": "Equipment"},
+            {"name": "Microscope 02", "location": "WCUS-3<br>(Wall Cupboard-01)", "category": "Equipment"},
+            {"name": "Microscope 03", "location": "WCUS-6<br>(Wall Cupboard-01)", "category": "Equipment"},
+            {"name": "Microscope 04", "location": "WCUS-6<br>(Wall Cupboard-01)", "category": "Equipment"},
+            {"name": "Microscope 05", "location": "WCLS-1<br>(Wall Cupboard-04)", "category": "Equipment"},
+            {"name": "All Microscope Chargers", "location": "WCLS-1<br>(Wall Cupboard-04)", "category": "Equipment"},
+            {"name": "Oven", "location": "Near the Fumehood", "category": "Equipment"},
+            {"name": "Refrigerator", "location": "Near the Wall Cupboard", "category": "Equipment"}
+        ];
+
+        let activeCategory = 'All';
+
+        function renderList(itemsToRender) {
+            const listEl = document.getElementById('itemList');
+            const emptyEl = document.getElementById('emptyState');
+            listEl.innerHTML = '';
+
+            if (!itemsToRender || itemsToRender.length === 0) {
+                emptyEl.style.display = 'block';
+                return;
+            } else {
+                emptyEl.style.display = 'none';
+            }
+
+            itemsToRender.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-cat">${item.category}</div>
+                    </div>
+                    <div class="item-location">${item.location}</div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function setCategory(cat, btn) {
+            activeCategory = cat;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            filterItems();
+        }
+
+        function filterItems() {
+            const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+            const filtered = rawData.filter(item => {
+                const matchesCat = (activeCategory === 'All') || (item.category === activeCategory);
+                const matchesQuery = item.name.toLowerCase().includes(query) || item.location.toLowerCase().includes(query);
+                return matchesCat && matchesQuery;
+            });
+            renderList(filtered);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderList(rawData);
+        });
+    </script>
+</body>
+</html>
