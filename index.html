@@ -21,6 +21,10 @@
         .header {
             text-align: center;
             margin-bottom: 20px;
+            background-color: #e6f2ff;
+            border: 2px solid #99c2ff;
+            border-radius: 12px;
+            padding: 16px;
         }
         .header h1 {
             font-size: 1.5rem;
@@ -88,7 +92,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
         }
         .item-info {
@@ -105,6 +109,33 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-top: 2px;
+        }
+        .item-details {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .storage-group {
+            font-size: 0.75rem;
+            color: #2c5282;
+            background-color: #ebf8ff;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            width: fit-content;
+            font-weight: 600;
+        }
+        .hazard-warning {
+            font-size: 0.75rem;
+            color: #9b2c2c;
+            background-color: #fff5f5;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            width: fit-content;
+            font-weight: 500;
+            border: 1px solid #feb2b2;
         }
         .item-location {
             background-color: #ebf8ff;
@@ -127,13 +158,13 @@
 </head>
 <body>
 
-    <div class="header" style="background-color: #e6f2ff; border: 2px solid #99c2ff; border-radius: 12px; padding: 16px;">
+    <div class="header">
         <h1>🔬 Science Lab Catalogue</h1>
-        <p>Quick Location Search</p>
+        <p>Quick Location & Safety Search</p>
     </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-bar" placeholder="Search item name or location..." oninput="filterItems()">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Search name, location, or safety group..." oninput="filterItems()">
         <div class="category-tabs">
             <button class="tab active" onclick="setCategory('All', this)">All</button>
             <button class="tab" onclick="setCategory('Glassware', this)">Glassware</button>
@@ -197,26 +228,29 @@
             {"name": "Microcentrifuge Tubes 1.5 ml", "location": "PLS-10<br>(Pantry Cupboard-07)", "category": "Consumables"},
             {"name": "Microcentrifuge Tubes 2.0 ml", "location": "PLS-10<br>(Pantry Cupboard-07)", "category": "Consumables"},
             {"name": "pH Indicator strips (nobleeding) pH 0 -14", "location": "PUS-10<br>(Pantry Cupboard-03)", "category": "Consumables"},
-            {"name": "XS buffer solution pH 7.00 +/- 0.01 / 25C green color", "location": "PUS-8<br>(Pantry Cupboard-02)", "category": "Chemicals"},
-            {"name": "XS buffer solution pH 10.01 +/- 0.02 / 25C colourless", "location": "PUS-8<br>(Pantry Cupboard-02)", "category": "Chemicals"},
-            {"name": "XS buffer solution pH 4.00 +/- 0.01 (RED)", "location": "PUS-8<br>(Pantry Cupboard-02)", "category": "Chemicals"},
-            {"name": "Calcium Carbonate", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
-            {"name": "Iodine Resublimed", "location": "PLS-11<br>(Pantry Cupboard-07)", "category": "Chemicals"},
-            {"name": "Isopropanol (IPA)", "location": "PLS-8<br>(Pantry Cupboard-06)", "category": "Chemicals"},
-            {"name": "Magnesium Sulfate Heptahydrate", "location": "WCUS-15<br>(Wall Cupboard-06)", "category": "Chemicals"},
-            {"name": "Nitric Acid (69%)", "location": "PLS-2<br>(Pantry Cupboard-05)", "category": "Chemicals"},
-            {"name": "Potassium Iodide", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
-            {"name": "Sodium Carbonate Anhydrous", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
-            {"name": "Sodium Sulphate Anhydrous", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
-            {"name": "Sodium Hydroxide Pellets", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
-            {"name": "Ammonium Thiocyanate", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
-            {"name": "Barium Chloride Dihydrate", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals"},
-            {"name": "Sulphuric Acid 98%", "location": "PLS-1<br>(Pantry Cupboard-05)", "category": "Chemicals"},
-            {"name": "Phenolphthalein", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals"},
-            {"name": "Potassium Chloride", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals"},
-            {"name": "Silver Nitrate", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals"},
-            {"name": "Sodium Chloride", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals"},
-            {"name": "Starch Soluble extra pure", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals"},
+            
+            // CHEMICALS (Updated locations from second dataset)
+            {"name": "XS buffer solution pH 7.00 +/- 0.01 / 25C green color", "location": "PUS-8<br>(Pantry Cupboard-02)", "category": "Chemicals", "storageGroup": "Group 10 (Non-Hazardous Liquids)", "doNotStoreWith": "None"},
+            {"name": "XS buffer solution pH 10.01 +/- 0.02 / 25C colourless", "location": "PUS-8<br>(Pantry Cupboard-02)", "category": "Chemicals", "storageGroup": "Group 10 (Non-Hazardous Liquids)", "doNotStoreWith": "None"},
+            {"name": "XS buffer solution pH 4.00 +/- 0.01 (RED)", "location": "PUS-8<br>(Pantry Cupboard-02)", "category": "Chemicals", "storageGroup": "Group 10 (Non-Hazardous Liquids)", "doNotStoreWith": "None"},
+            {"name": "Calcium Carbonate", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals", "storageGroup": "Group 10 (Inorganic Solids)", "doNotStoreWith": "Acids"},
+            {"name": "Iodine Resublimed", "location": "PLS-11<br>(Pantry Cupboard-07)", "category": "Chemicals", "storageGroup": "Group 8 (Oxidizer Solids)", "doNotStoreWith": "Reducing Agents, Flammables, Ammonia"},
+            {"name": "Isopropanol (IPA)", "location": "PLS-8<br>(Pantry Cupboard-06)", "category": "Chemicals", "storageGroup": "Group 3 (Flammable Liquids)", "doNotStoreWith": "Strong Oxidizers, Nitric Acid"},
+            {"name": "Magnesium Sulfate Heptahydrate", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals", "storageGroup": "Group 10 (Inorganic Solids)", "doNotStoreWith": "Strong Oxidizers"},
+            {"name": "Nitric Acid (69%)", "location": "PLS-2<br>(Pantry Cupboard-05)", "category": "Chemicals", "storageGroup": "Group 8 (Oxidizing Acids)", "doNotStoreWith": "Bases, Organic Materials, Flammables, Metals"},
+            {"name": "Potassium Iodide", "location": "PLS-11<br>(Pantry Cupboard-03)", "category": "Chemicals", "storageGroup": "Group 10 (Inorganic Solids)", "doNotStoreWith": "Strong Acids, Oxidizers"},
+            {"name": "Sodium Carbonate Anhydrous", "location": "WCLS-9<br>(Wall Cupboard-05)", "category": "Chemicals", "storageGroup": "Group 10 (Inorganic Solids)", "doNotStoreWith": "Acids"},
+            {"name": "Sodium Sulphate Anhydrous", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals", "storageGroup": "Group 10 (Inorganic Solids)", "doNotStoreWith": "Strong Acids"},
+            {"name": "Sodium Hydroxide Pellets", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals", "storageGroup": "Group 7 (Inorganic Bases)", "doNotStoreWith": "Acids, Metals, Organic Materials"},
+            {"name": "Ammonium Thiocyanate", "location": "WCLS-5<br>(Wall Cupboard-02)", "category": "Chemicals", "storageGroup": "Group 10 (Inorganic Solids)", "doNotStoreWith": "Strong Acids, Oxidizers, Chlorates"},
+            {"name": "Barium Chloride Dihydrate", "location": "WCLS-10<br>(Wall Cupboard-05)", "category": "Chemicals", "storageGroup": "Group 10 (Inorganic Solids)", "doNotStoreWith": "Barium-sensitive Toxics, Oxidizers"},
+            {"name": "Sulphuric Acid 98%", "location": "PLS-1<br>(Pantry Cupboard-05)", "category": "Chemicals", "storageGroup": "Group 5 (Inorganic Acids)", "doNotStoreWith": "Bases, Water (rapid addition), Flammables, Metals"},
+            {"name": "Phenolphthalein", "location": "WCUS-15<br>(Wall Cupboard-03)", "category": "Chemicals", "storageGroup": "Group 10 (Organic Solids)", "doNotStoreWith": "Strong Oxidizers"},
+            {"name": "Potassium Chloride", "location": "WCLS-9<br>(Wall Cupboard-05)", "category": "Chemicals", "storageGroup": "Group 10 (Inorganic Solids)", "doNotStoreWith": "Strong Acids, Oxidizers"},
+            {"name": "Silver Nitrate", "location": "WCLS-8<br>(Wall Cupboard-04)", "category": "Chemicals", "storageGroup": "Group 8 (Oxidizers)", "doNotStoreWith": "Combustibles, Organic Materials, Reducing Agents"},
+            {"name": "Sodium Chloride", "location": "WCLS-9<br>(Wall Cupboard-05)", "category": "Chemicals", "storageGroup": "Group 10 (Inorganic Solids)", "doNotStoreWith": "Strong Acids"},
+            {"name": "Starch Soluble extra pure", "location": "WCUS-15<br>(Wall Cupboard-05)", "category": "Chemicals", "storageGroup": "Group 10 (Organic Solids)", "doNotStoreWith": "Strong Oxidizers"},
+
             {"name": "Balance", "location": "Counter Top", "category": "Equipment"},
             {"name": "PH Meter", "location": "Counter Top", "category": "Equipment"},
             {"name": "Microscope 01", "location": "WCUS-3<br>(Wall Cupboard-01)", "category": "Equipment"},
@@ -246,10 +280,22 @@
             itemsToRender.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'item-card';
+
+                const storageGroupHTML = item.storageGroup ? `<span class="storage-group">📦 ${item.storageGroup}</span>` : '';
+                const hazardHTML = (item.doNotStoreWith && item.doNotStoreWith !== 'None') ? `<span class="hazard-warning">⚠️ Do NOT store with: ${item.doNotStoreWith}</span>` : '';
+
+                const detailsHTML = (storageGroupHTML || hazardHTML) ? `
+                    <div class="item-details">
+                        ${storageGroupHTML}
+                        ${hazardHTML}
+                    </div>
+                ` : '';
+
                 card.innerHTML = `
                     <div class="item-info">
                         <div class="item-name">${item.name}</div>
                         <div class="item-cat">${item.category}</div>
+                        ${detailsHTML}
                     </div>
                     <div class="item-location">${item.location}</div>
                 `;
@@ -268,14 +314,23 @@
             const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
             const filtered = rawData.filter(item => {
                 const matchesCat = (activeCategory === 'All') || (item.category === activeCategory);
-                const matchesQuery = item.name.toLowerCase().includes(query) || item.location.toLowerCase().includes(query);
+                
+                const searchTarget = `
+                    ${item.name} 
+                    ${item.location} 
+                    ${item.storageGroup || ''} 
+                    ${item.doNotStoreWith || ''}
+                `.toLowerCase();
+
+                const matchesQuery = searchTarget.includes(query);
                 return matchesCat && matchesQuery;
             });
             renderList(filtered);
         }
 
-        // Direct call ensures content renders immediately on mobile scan
-        renderList(rawData);
+        window.addEventListener('DOMContentLoaded', () => {
+            renderList(rawData);
+        });
     </script>
 </body>
 </html>
